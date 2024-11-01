@@ -1,0 +1,292 @@
+:root {
+  --primary-color: #7c5dfa;
+  --primary-hover: #9277ff;
+  --success-color: #4caf50;
+  --warning-color: #ff9800;
+  --error-color: #f44336;
+  --background-light: #f5f5f5;
+  --background-dark: #1e1f26;
+  --card-light: #ffffff;
+  --card-dark: #2a2b36;
+  --text-light: #333333;
+  --text-dark: #ffffff;
+  --border-radius: 8px;
+  --transition: all 0.3s ease;
+  --shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+body {
+  margin: 0;
+  padding: 20px;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: var(--background-light);
+  color: var(--text-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  transition: var(--transition);
+}
+
+body.dark-mode {
+  background-color: var(--background-dark);
+  color: var(--text-dark);
+}
+
+.container {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  background-color: var(--card-light);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  padding: 24px;
+  transition: var(--transition);
+}
+
+.dark-mode .container {
+  background-color: var(--card-dark);
+}
+
+/* Dark Mode Toggle Button */
+#darkModeToggle {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background-color: var(--primary-color);
+  color: white;
+  width: 50px;
+  height: 50px;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px; /* Increased size for better visibility */
+  transition: var(--transition);
+}
+
+#darkModeToggle:hover {
+  background-color: var(--primary-hover);
+}
+
+body.dark-mode #darkModeToggle {
+  background-color: var(--primary-hover);
+}
+
+/* Form and Button Styles */
+.todo-form {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.todo-form input[type="text"],
+.todo-form input[type="date"],
+.todo-form select {
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: var(--border-radius);
+  font-size: 14px;
+  color: inherit;
+  background-color: inherit;
+  flex: 1;
+  transition: var(--transition);
+}
+
+.todo-form button {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.todo-form button:hover {
+  background-color: var(--primary-hover);
+}
+
+/* Control Buttons */
+.control-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 12px;
+}
+
+#toggle-all-btn,
+#clear-completed-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  color: white;
+  transition: var(--transition);
+}
+
+#toggle-all-btn {
+  background-color: var(--primary-color);
+}
+
+#toggle-all-btn:hover {
+  background-color: var(--primary-hover);
+}
+
+#clear-completed-btn {
+  background-color: var(--error-color);
+}
+
+#clear-completed-btn:hover {
+  background-color: #e53935;
+}
+
+/* Todo Item Styles */
+.todo-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  background-color: var(--card-light);
+  border-radius: var(--border-radius);
+  margin-bottom: 8px;
+  box-shadow: var(--shadow);
+  transition: var(--transition);
+}
+
+.dark-mode .todo-item {
+  background-color: var(--card-dark);
+}
+
+.todo-item.completed .todo-text {
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+
+.priority-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.priority-high {
+  background-color: var(--error-color);
+  color: white;
+}
+
+.priority-medium {
+  background-color: var(--warning-color);
+  color: white;
+}
+
+.priority-low {
+  background-color: var(--success-color);
+  color: white;
+}
+
+/* Progress Bar Styles */
+.progress-bar {
+  height: 8px;
+  background-color: #ddd;
+  border-radius: 4px;
+  margin: 24px 0;
+  overflow: hidden;
+}
+
+#progress-bar {
+  height: 100%;
+  background-color: var(--primary-color);
+  transition: width 0.3s ease;
+}
+
+/* Empty State Message */
+.empty-list-message {
+  text-align: center;
+  padding: 24px;
+  color: #666;
+}
+
+/* Edit and Delete Buttons */
+.edit-btn,
+.delete-btn {
+  padding: 8px 12px;
+  border: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Edit Button Styles */
+.edit-btn {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.edit-btn:hover {
+  background-color: var(--primary-hover);
+}
+
+/* Delete Button Styles */
+.delete-btn {
+  background-color: var(--error-color);
+  color: white;
+}
+
+.delete-btn:hover {
+  background-color: #e53935;
+}
+
+/* Add Icons to Buttons (optional) */
+.edit-btn::before {
+  content: '✏️'; /* Edit icon */
+  margin-right: 5px; /* Space between icon and text */
+}
+
+.delete-btn::before {
+  content: '🗑️'; /* Delete icon */
+  margin-right: 5px; /* Space between icon and text */
+}
+
+
+/* Dark Mode Specific Styles for Form Elements */
+body.dark-mode .todo-form input[type="text"],
+body.dark-mode .todo-form input[type="date"],
+body.dark-mode .todo-form select {
+  background-color: var(--card-dark);
+  color: var(--text-dark);
+  border-color: #444;
+}
+
+body.dark-mode .todo-form button {
+  background-color: var(--primary-hover);
+}
+
+body.dark-mode .todo-form button:hover {
+  background-color: var(--primary-color);
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+  .todo-form {
+    flex-direction: column;
+  }
+  
+  .container {
+    padding: 16px;
+  }
+
+  .control-buttons {
+    flex-direction: column;
+    gap: 8px;
+  }
+}

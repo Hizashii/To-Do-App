@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Todo App</title>
+  <link rel="stylesheet" href="src/styles/main.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Todo List</h1>
+      <div class="header-actions">
+        <button id="darkModeToggle" class="icon-button">🌙</button>
+      </div>
+    </header>
+
+    <form class="todo-form">
+      <input 
+        type="text" 
+        id="todo-input" 
+        placeholder="Add a new todo..." 
+        required
+      >
+      <input 
+        type="date" 
+        id="due-date"
+      >
+      <select id="priority">
+        <option value="Low">Low Priority</option>
+        <option value="Medium">Medium Priority</option>
+        <option value="High">High Priority</option>
+      </select>
+      <button type="submit">Add Todo</button>
+    </form>
+
+    <div class="progress-bar">
+      <div id="progress-bar"></div>
+    </div>
+
+    <ul id="todo-list"></ul>
+
+    <div class="actions">
+      <button id="toggle-all-btn">Toggle All</button>
+      <button id="clear-completed-btn">Clear Completed</button>
+    </div>
+  </div>
+  <script type="module" src="src/main.ts"></script>
+</body>
+</html>
