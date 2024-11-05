@@ -26,15 +26,14 @@ jobs:
       - name: Build website
         run: npm run build
         
-      - name: SFTP delivery
-        uses: appleboy/scp-action@master
+      - name: FTP delivery
+        uses: SamKirkland/FTP-Deploy-Action@4.3.3
         with:
-          host: ssh.sunguard.dk
-          username: sunguard.dk
-          password: ${{ secrets.SFTP_PASSWORD }}
-          port: 22
-          source: "./dist/*"  # This is the local path to your files
-          target: "/home/sunguard.dk/public_html/test/todo/"  # Adjust this to your server path
+          server: ${{ vars.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: live/todo/ 
+          local-dir: 2024-todo-TS-app-bde-main/dist/ h
           
       - name: Install TestCafe
         run: npm install -g testcafe
@@ -72,12 +71,11 @@ jobs:
             exit 1
           fi
           
-      - name: SFTP delivery
-        uses: appleboy/scp-action@master
+      - name: FTP delivery
+        uses: SamKirkland/FTP-Deploy-Action@4.3.3
         with:
-          host: ssh.sunguard.dk
-          username: sunguard.dk
-          password: ${{ secrets.SFTP_PASSWORD }}
-          port: 22
-          source: "./dist/*"  # This is the local path to your files
-          target: "/home/sunguard.dk/public_html/live/todo/"  # Adjust this to your server path
+          server: ${{ vars.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: live/todo/ 
+          local-dir: 2024-todo-TS-app-bde-main/dist/ 
