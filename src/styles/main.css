@@ -193,7 +193,7 @@ body.dark-mode #darkModeToggle {
 
 /* Progress Bar Styles */
 .progress-bar {
-  height: 8px;
+  height: 16px; /* Increased height for a thicker bar */
   background-color: #ddd;
   border-radius: 4px;
   margin: 24px 0;
