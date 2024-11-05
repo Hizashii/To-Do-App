@@ -1,71 +1,32 @@
-name: CI/CD Pipeline for Todo App
+name: TeamWorkflow
 
 on:
   push:
     branches:
       - main
 
-jobs:
-  build-and-test:
+
+job:
+  integration-delivery:
     runs-on: ubuntu-latest
+    enviroment: Test
+    container:
+      image: node
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+   - name: Checkout code
+    uses: actions/checkout@v3
 
-      - name: List full directory structure
-        run: |
-          echo "Current working directory:"
-          pwd
-          echo "Directory contents:"
-          ls -R  # Check the repository structure
+   - name: Install dependencies
+    run: npm install
+    
+   - name: Build website
+    run: npm run build
 
-      - name: Install Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '20'  # Specify your Node.js version
-
-      - name: Install dependencies
-        working-directory: BDE  # Set working directory to BDE
-        run: npm install  # This installs dependencies from package.json in BDE
-
-      - name: Build the application
-        working-directory: BDE  # Build from the BDE directory
-        run: npm run build  # Ensure your build script is defined in BDE's package.json
-
-      - name: Install TestCafe
-        run: npm install -g testcafe
-
-      - name: Update APT
-        run: sudo apt-get update
-
-      - name: Install Chromium
-        run: sudo apt-get install -y chromium
-
-      - name: Run tests
-        working-directory: BDE/src  # Adjust this path to where your tests are located
-        run: testcafe chromium:headless todo-app.testcafe.ts  # Adjust path to your test file
-
-      - name: Store build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-output
-          path: BDE/dist/  # Adjust if the output is located elsewhere
-
-  deploy:
-    needs: build-and-test
-    runs-on: ubuntu-latest
-    steps:
-      - name: Load artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: build-output
-          path: BDE/dist/
-
-      - name: FTP deploy
-        uses: SamKirkland/FTP-Deploy-Action@4.3.3
-        with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: live/todo/  # Update this to your production directory
-          local-dir: BDE/dist/  # Ensure this points to the correct directory
+   - name: FTP delivery
+    uses: SamKirkland/FTP-Deploy-Action@4.3.3
+    with:
+      server: ${{ vars.FTP_SERVER }}
+      username: ${{ secrets.FTP_USERNAME }}
+      password: ${{ secrets.FTP_PASSWORD }}
+      server-dir: test/todo/
+      local-dir: dist/
