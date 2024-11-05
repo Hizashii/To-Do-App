@@ -1,0 +1,67 @@
+name: CI/CD Pipeline for Todo App
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: List files
+        run: ls -R  # Check the repository structure
+      
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'  # Specify your Node.js version
+
+      - name: Install dependencies
+        working-directory: BDE  # Adjust if necessary
+        run: npm install
+
+      - name: Build the application
+        working-directory: BDE
+        run: npm run build  # Ensure you have a build script in package.json
+
+      - name: Install TestCafe
+        run: npm install -g testcafe
+
+      - name: Update APT
+        run: sudo apt-get update
+
+      - name: Install Chromium
+        run: sudo apt-get install -y chromium
+
+      - name: Run tests
+        working-directory: BDE
+        run: testcafe chromium:headless test/todo-app.js  # Adjust the path to your test file
+
+      - name: Store build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-output
+          path: BDE/dist/
+
+  deploy:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Load artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-output
+          path: BDE/dist/
+
+      - name: FTP deploy
+        uses: SamKirkland/FTP-Deploy-Action@4.3.3
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: live/todo/  # Update this to your production directory
+          local-dir: BDE/dist/
