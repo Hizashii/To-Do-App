@@ -5,7 +5,7 @@ on:
     branches:
       - main
 
-jobs:  # Use 'jobs' instead of 'job'
+jobs:
   integration-delivery:
     runs-on: ubuntu-latest
     environment: Test
@@ -14,6 +14,11 @@ jobs:  # Use 'jobs' instead of 'job'
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
 
       - name: Install dependencies
         run: npm install
@@ -25,7 +30,7 @@ jobs:  # Use 'jobs' instead of 'job'
         run: npm run dev &
         env:
           HOST: localhost
-          PORT: 5173  # Ensure this matches the port used in your tests
+          PORT: 5173
 
       - name: Wait for server to be ready
         run: |
@@ -34,19 +39,17 @@ jobs:  # Use 'jobs' instead of 'job'
             sleep 3
           done
 
-      - name: Install TestCafe
-        run: npm install -g testcafe
+      - name: Install Chromium
+        run: sudo apt-get install -y chromium-browser
 
       - name: Run tests
-        run: testcafe chromium:headless test/*.testcafe.ts
+        run: testcafe /usr/bin/chromium-browser:headless test/*.testcafe.ts
 
       - name: Store artifacts
         uses: actions/upload-artifact@v3
         with:
           name: dist
           path: dist/
-
-
 
   deployment:
     needs: integration-delivery
@@ -58,6 +61,7 @@ jobs:  # Use 'jobs' instead of 'job'
         with:
           name: dist
           path: dist/
+          
       - name: FTP deploy
         uses: SamKirkland/FTP-Deploy-Action@4.3.3
         with:
@@ -66,4 +70,3 @@ jobs:  # Use 'jobs' instead of 'job'
           password: ${{ secrets.FTP_PASSWORD }}
           server-dir: live/todo/
           local-dir: dist/
-
