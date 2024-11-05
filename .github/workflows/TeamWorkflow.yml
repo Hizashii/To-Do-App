@@ -5,20 +5,15 @@ on:
     branches:
       - main
 
-jobs:
-  integration-delivery:
+jobs:  # Use 'jobs' instead of 'job'
+  integration-delivery:  # Job name
     runs-on: ubuntu-latest
-    environment: Test
+    environment: Test  # Corrected spelling
     container:
       image: node
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '16'
 
       - name: Install dependencies
         run: npm install
@@ -26,30 +21,33 @@ jobs:
       - name: Build website
         run: npm run build
 
-      - name: Start development server
-        run: npm run dev &
-        env:
-          HOST: localhost
-          PORT: 5173
+      - name: FTP delivery
+        uses: SamKirkland/FTP-Deploy-Action@4.3.3
+        with:
+          server: ${{ vars.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: test/todo/
+          local-dir: dist/  # Ensure this points to the correct build output directory
+     
+      - name: Install TestCafe
+        run: npm install -g testcafe
 
-      - name: Wait for server to be ready
-        run: |
-          until curl -s http://localhost:5173; do
-            echo "Waiting for server..."
-            sleep 3
-          done
+      - name: Update APT
+        run: apt-get update
 
       - name: Install Chromium
-        run: sudo apt-get install -y chromium-browser
+        run: apt-get install -y chromium
 
       - name: Run tests
-        run: testcafe /usr/bin/chromium-browser:headless test/*.testcafe.ts
+        run: testcafe chromium:headless test/*todo-app.testcafe.ts
 
       - name: Store artifacts
         uses: actions/upload-artifact@v3
         with:
           name: dist
           path: dist/
+
 
   deployment:
     needs: integration-delivery
@@ -61,7 +59,6 @@ jobs:
         with:
           name: dist
           path: dist/
-          
       - name: FTP deploy
         uses: SamKirkland/FTP-Deploy-Action@4.3.3
         with:
@@ -70,3 +67,4 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           server-dir: live/todo/
           local-dir: dist/
+
