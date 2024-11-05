@@ -12,7 +12,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: List files
+      - name: List repository structure
         run: ls -R  # Check the repository structure
       
       - name: Install Node.js
@@ -21,12 +21,12 @@ jobs:
           node-version: '20'  # Specify your Node.js version
 
       - name: Install dependencies
-        working-directory: BDE  # Adjust if necessary
-        run: npm install
+        working-directory: BDE  # Set working directory to BDE
+        run: npm install  # This installs dependencies from package.json in BDE
 
       - name: Build the application
-        working-directory: BDE
-        run: npm run build  # Ensure you have a build script in package.json
+        working-directory: BDE  # Again, build from the BDE directory
+        run: npm run build  # Ensure your build script is defined in BDE's package.json
 
       - name: Install TestCafe
         run: npm install -g testcafe
@@ -38,14 +38,14 @@ jobs:
         run: sudo apt-get install -y chromium
 
       - name: Run tests
-        working-directory: BDE
-        run: testcafe chromium:headless test/todo-app.js  # Adjust the path to your test file
+        working-directory: BDE/src  # Pointing to where the test files are located
+        run: testcafe chromium:headless test/todo-app.js  # Adjust path to your test file
 
       - name: Store build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: build-output
-          path: BDE/dist/
+          path: BDE/dist/  # Adjust if the output is located elsewhere
 
   deploy:
     needs: build-and-test
@@ -64,4 +64,4 @@ jobs:
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           server-dir: live/todo/  # Update this to your production directory
-          local-dir: BDE/dist/
+          local-dir: BDE/dist/  # Ensure this points to the correct directory
