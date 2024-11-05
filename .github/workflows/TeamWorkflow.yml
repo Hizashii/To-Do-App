@@ -28,7 +28,7 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}  # Set in GitHub secrets
           port: 22  # Port for SFTP
           source: "dist/*"  # Adjust based on your build output
-          target: "/path/on/server/test/todo/"  # Adjust this to the correct target directory
+          target: "/var/www/html/todo-app/"
 
       - name: List files
         run: ls -R
