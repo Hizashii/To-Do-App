@@ -8,7 +8,6 @@ export class TodoService {
     this.loadFromLocalStorage();
   }
 
-
   static getInstance(): TodoService {
     if (!TodoService.instance) {
       TodoService.instance = new TodoService();

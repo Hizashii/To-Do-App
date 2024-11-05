@@ -3,21 +3,80 @@ name: TeamWorkflow
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
-  build:
+  integration-delivery:
     runs-on: ubuntu-latest
     environment: Test
     container:
       image: node
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
       - name: Install dependencies
-        run: npm install
+        working-directory: 2024-todo-TS-app-bde-main
+        run: npm install 
 
       - name: Build website
+        working-directory: 2024-todo-TS-app-bde-main
         run: npm run build
+        
+      - name: FTP delivery
+        uses: SamKirkland/FTP-Deploy-Action@4.3.3
+        with:
+          server: ${{ vars.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: test/todo/ 
+          local-dir: 2024-todo-TS-app-bde-main/dist/ 
+        
+      - name: List files
+        run: ls -R
+
+      - name: Install TestCafe
+        run: npm install -g testcafe
+
+      - name: Update APT
+        run: sudo apt-get update
+
+      - name: Install Chromium
+        run: sudo apt-get install -y chromium
+        
+      - name: Run tests
+        working-directory: 2024-todo-TS-app-bde-main
+        run: testcafe chromium:headless test/todo-app.js
+        
+      - name: Store artifacts
+        uses: actions/upload-artifact@v4  # Updated to v4
+        with:
+          name: dist
+          path: 2024-todo-TS-app-bde-main/dist/
+
+  deployment:
+    needs: integration-delivery
+    runs-on: ubuntu-latest
+    environment: Live
+    steps:
+      - name: Load artifacts
+        uses: actions/download-artifact@v4  # Updated to v4
+        with:
+          name: dist
+          path: 2024-todo-TS-app-bde-main/dist/  # Adjusted path
+
+      - name: Ensure /dist directory exists
+        run: |
+          if [ ! -d "2024-todo-TS-app-bde-main/dist" ]; then
+            echo "/dist directory not found!"
+            exit 1
+          fi
+
+      - name: FTP deploy
+        uses: SamKirkland/FTP-Deploy-Action@4.3.3
+        with:
+          server: ${{ vars.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: live/todo/ 
+          local-dir: 2024-todo-TS-app-bde-main/dist/
