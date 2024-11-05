@@ -21,6 +21,21 @@ jobs:  # Use 'jobs' instead of 'job'
       - name: Build website
         run: npm run build
 
+      - name: Start development server
+        run: npm run dev &  # Start the server in the background
+        env:
+          HOST: localhost
+          PORT: 5173
+
+      - name: Wait for server to be ready
+        run: |
+          echo "Waiting for the development server to start..."
+          until curl -s http://localhost:5173; do
+            echo "Waiting for server to be ready..."
+            sleep 3
+          done
+          echo "Server is up and running!"
+
       - name: FTP delivery
         uses: SamKirkland/FTP-Deploy-Action@4.3.3
         with:
