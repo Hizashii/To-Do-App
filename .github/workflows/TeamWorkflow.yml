@@ -3,7 +3,7 @@ name: TeamWorkflow
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   integration-delivery:
@@ -26,12 +26,13 @@ jobs:
       - name: FTP delivery
         uses: SamKirkland/FTP-Deploy-Action@4.3.3
         with:
-          server: ${{ vars.FTP_SERVER }}
+          server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: test/todo/ 
-          local-dir: 2024-todo-TS-app-bde-main/dist/ 
-        
+          server-dir: test/todo/
+          local-dir: 2024-todo-TS-app-bde-main/dist/
+          protocol: sftp  # Specify SFTP protocol for secure transfer
+
       - name: List files
         run: ls -R
 
@@ -49,7 +50,7 @@ jobs:
         run: testcafe chromium:headless test/todo-app.js
         
       - name: Store artifacts
-        uses: actions/upload-artifact@v4  # Updated to v4
+        uses: actions/upload-artifact@v4
         with:
           name: dist
           path: 2024-todo-TS-app-bde-main/dist/
@@ -60,10 +61,10 @@ jobs:
     environment: Live
     steps:
       - name: Load artifacts
-        uses: actions/download-artifact@v4  # Updated to v4
+        uses: actions/download-artifact@v4
         with:
           name: dist
-          path: 2024-todo-TS-app-bde-main/dist/  # Adjusted path
+          path: 2024-todo-TS-app-bde-main/dist/
 
       - name: Ensure /dist directory exists
         run: |
@@ -75,8 +76,9 @@ jobs:
       - name: FTP deploy
         uses: SamKirkland/FTP-Deploy-Action@4.3.3
         with:
-          server: ${{ vars.FTP_SERVER }}
+          server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: live/todo/ 
+          server-dir: live/todo/
           local-dir: 2024-todo-TS-app-bde-main/dist/
+          protocol: sftp  # Use SFTP protocol here as well
