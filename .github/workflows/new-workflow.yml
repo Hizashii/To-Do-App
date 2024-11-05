@@ -1,0 +1,62 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: List files
+        run: ls -R  # Check the repository structure
+      
+      - name: Install dependencies
+        working-directory: BDE  # Adjust if BDE is in a subfolder
+        run: npm install
+
+      - name: Build website
+        working-directory: BDE
+        run: npm run build
+
+      - name: Install TestCafe
+        run: npm install -g testcafe
+
+      - name: Update APT
+        run: sudo apt-get update
+
+      - name: Install Chromium
+        run: sudo apt-get install -y chromium
+
+      - name: Run tests
+        working-directory: BDE
+        run: testcafe chromium:headless test/todo-app.js
+
+      - name: Store artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-output
+          path: BDE/dist/
+
+  deploy:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Load artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-output
+          path: BDE/dist/
+
+      - name: FTP deploy
+        uses: SamKirkland/FTP-Deploy-Action@4.3.3
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: live/todo/
+          local-dir: BDE/dist/
