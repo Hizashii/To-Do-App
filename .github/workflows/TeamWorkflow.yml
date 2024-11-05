@@ -1,105 +1,83 @@
-name: TeamWorkflow
+name: CI/CD Pipeline
 
 on:
   push:
     branches:
-      - main
+      - main  # Change this to the branch you want to use for deployment
 
 jobs:
   integration-delivery:
-    runs-on: ubuntu-latest  # Change from using node container to ubuntu-latest
+    runs-on: ubuntu-latest
+    environment: Test
+    container:
+      image: node
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
       - name: Install dependencies
+        working-directory: 2024-todo-TS-app-bde-main
         run: npm install 
 
       - name: Build website
+        working-directory: 2024-todo-TS-app-bde-main
         run: npm run build
 
-      - name: SFTP delivery
-        uses: appleboy/scp-action@master
+      - name: FTP delivery
+        uses: SamKirkland/FTP-Deploy-Action@4.3.3
         with:
-          host: ssh.sunguard.dk
-          username: ${{ secrets.FTP_USERNAME }}  # Set in GitHub secrets
-          password: ${{ secrets.FTP_PASSWORD }}  # Set in GitHub secrets
-          port: 22  # Port for SFTP
-          source: "dist/*"  # Adjust based on your build output
-          target: "/var/www/html/todo-app/"
+          server: ${{ vars.FTP_SERVER }}  # Your FTP server address
+          username: ${{ secrets.FTP_USERNAME }}  # Set this in GitHub secrets
+          password: ${{ secrets.FTP_PASSWORD }}  # Set this in GitHub secrets
+          server-dir: test/todo/  # Adjust this path based on your FTP structure
+          local-dir: 2024-todo-TS-app-bde-main/dist/  # Path to the built files
 
       - name: List files
         run: ls -R
 
-  run-tests:
-    runs-on: ubuntu-latest  # Use the same environment
-    needs: integration-delivery
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - name: Install TestCafe
+        run: npm install -g testcafe
 
-      - name: Install TestCafe and Chromium
+      - name: Update APT
+        run: sudo apt-get update  # Ensure this runs with the correct permissions
+
+      - name: Install Chromium
         run: |
-          sudo apt-get update
-          sudo apt-get install -y chromium
-          npm install -g testcafe
+          sudo apt-get install -y chromium-browser  # Change to chromium-browser if needed
 
       - name: Run tests
+        working-directory: 2024-todo-TS-app-bde-main
         run: testcafe chromium:headless test/todo-app.js
 
       - name: Store artifacts
-        run: |
-          echo "Checking if dist directory exists..."
-          if [ -d "dist" ]; then
-            echo "Uploading dist artifacts..."
-            tar -czf dist.tar.gz dist/  # Create a tarball of the dist directory
-            echo "Uploading artifacts..."
-            echo "dist.tar.gz" > dist-files.txt
-          else
-            echo "/dist directory not found!"
-            exit 1
-          fi
-
-      - name: Upload dist artifact
         uses: actions/upload-artifact@v4
         with:
           name: dist
-          path: dist.tar.gz
+          path: 2024-todo-TS-app-bde-main/dist/
 
   deployment:
-    needs: run-tests
+    needs: integration-delivery
     runs-on: ubuntu-latest
+    environment: Live
     steps:
       - name: Load artifacts
         uses: actions/download-artifact@v4
         with:
           name: dist
-          path: ./  # Download to the current working directory
-
-      - name: Ensure dist.tar.gz exists
-        run: |
-          if [ ! -f "dist.tar.gz" ]; then
-            echo "dist.tar.gz not found!"
-            exit 1
-          fi
-
-      - name: Extract artifacts
-        run: |
-          tar -xzf dist.tar.gz  # Extract the downloaded tarball
+          path: 2024-todo-TS-app-bde-main/dist/  # Adjusted path
 
       - name: Ensure /dist directory exists
         run: |
-          if [ ! -d "dist" ]; then
+          if [ ! -d "2024-todo-TS-app-bde-main/dist" ]; then
             echo "/dist directory not found!"
             exit 1
           fi
 
-      - name: SFTP deploy
-        uses: appleboy/scp-action@master
+      - name: FTP deploy
+        uses: SamKirkland/FTP-Deploy-Action@4.3.3
         with:
-          host: ssh.sunguard.dk
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          port: 22
-          source: "dist/*"
-          target: "/var/www/html/todo-app/"
+          server: ${{ vars.FTP_SERVER }}  # Your FTP server address
+          username: ${{ secrets.FTP_USERNAME }}  # Set this in GitHub secrets
+          password: ${{ secrets.FTP_PASSWORD }}  # Set this in GitHub secrets
+          server-dir: live/todo/  # Adjust this path based on your FTP structure
+          local-dir: 2024-todo-TS-app-bde-main/dist/  # Path to the built files
