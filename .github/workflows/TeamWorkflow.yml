@@ -30,14 +30,15 @@ jobs:
         run: |
           mkdir -p BDE/dist  # Create the directory if it doesn't exist
 
-      - name: FTP delivery
-        uses: SamKirkland/FTP-Deploy-Action@4.3.3
+      - name: SFTP delivery
+        uses: appleboy/scp-action@master
         with:
-          server: ${{ vars.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: live/todo/
-          local-dir: BDE/dist/  # Ensure this ends with a slash
+          host: ssh.sunguard.dk  # Replace with your SFTP host
+          username: ${{ secrets.FTP_USERNAME }}  # Ensure this is set in secrets
+          password: ${{ secrets.FTP_PASSWORD }}  # Ensure this is set in secrets
+          port: 22  # Port for SFTP
+          source: "BDE/dist/*"  # Local files to upload
+          target: "/home/sunguard.dk/public_html/test/todo/"  # Target directory on the server
           
       - name: Install TestCafe
         run: npm install -g testcafe
@@ -75,11 +76,12 @@ jobs:
             exit 1
           fi
           
-      - name: FTP delivery
-        uses: SamKirkland/FTP-Deploy-Action@4.3.3
+      - name: SFTP delivery
+        uses: appleboy/scp-action@master
         with:
-          server: ${{ vars.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: live/todo/
-          local-dir: BDE/dist/  # Ensure this ends with a slash
+          host: ssh.sunguard.dk  # Replace with your SFTP host
+          username: ${{ secrets.FTP_USERNAME }}  # Ensure this is set in secrets
+          password: ${{ secrets.FTP_PASSWORD }}  # Ensure this is set in secrets
+          port: 22  # Port for SFTP
+          source: "BDE/dist/*"  # Local files to upload
+          target: "/home/sunguard.dk/public_html/test/todo/"  # Target directory on the server
