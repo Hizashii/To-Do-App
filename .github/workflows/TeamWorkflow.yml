@@ -8,8 +8,6 @@ on:
 jobs:
   integration-delivery:
     runs-on: ubuntu-latest
-    container:
-      image: node
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -33,14 +31,18 @@ jobs:
       - name: List files
         run: ls -R
 
+  run-tests:
+    runs-on: ubuntu-latest
+    needs: integration-delivery
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
       - name: Install TestCafe
-        run: npm install -g testcafe
-
-      - name: Update APT
-        run: sudo apt-get update
-
-      - name: Install Chromium
-        run: sudo apt-get install -y chromium
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y chromium
+          npm install -g testcafe
 
       - name: Run tests
         run: testcafe chromium:headless test/todo-app.js
@@ -76,4 +78,4 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           port: 22
           source: "dist/*"
-          target: "/var/www/html/todo-app/"  
+          target: "/var/www/html/todo-app/"
