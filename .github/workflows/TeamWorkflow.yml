@@ -32,8 +32,8 @@ jobs:
           server: ${{ vars.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: live/todo/ 
-          local-dir: 2024-todo-TS-app-bde-main/dist/ h
+          server-dir: live/todo/
+          local-dir: 2024-todo-TS-app-bde-main/dist/  # Ensure this ends with a slash
           
       - name: Install TestCafe
         run: npm install -g testcafe
@@ -77,5 +77,5 @@ jobs:
           server: ${{ vars.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: live/todo/ 
-          local-dir: 2024-todo-TS-app-bde-main/dist/ 
+          server-dir: live/todo/
+          local-dir: 2024-todo-TS-app-bde-main/dist/  # Ensure this ends with a slash
