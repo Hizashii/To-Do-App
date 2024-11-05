@@ -6,9 +6,9 @@ on:
       - main
 
 jobs:  # Use 'jobs' instead of 'job'
-   integration-delivery:
+  integration-delivery:  # Job name
     runs-on: ubuntu-latest
-    environment: Test
+    environment: Test  # Corrected spelling
     container:
       image: node
     steps:
@@ -21,21 +21,23 @@ jobs:  # Use 'jobs' instead of 'job'
       - name: Build website
         run: npm run build
 
-      - name: Start development server
-        run: npm run dev &
-        env:
-          HOST: localhost
-          PORT: 5173  # Ensure this matches the port used in your tests
-
-      - name: Wait for server to be ready
-        run: |
-          until curl -s http://localhost:5173; do
-            echo "Waiting for server..."
-            sleep 3
-          done
-
+      - name: FTP delivery
+        uses: SamKirkland/FTP-Deploy-Action@4.3.3
+        with:
+          server: ${{ vars.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: test/todo/
+          local-dir: dist/  # Ensure this points to the correct build output directory
+     
       - name: Install TestCafe
         run: npm install -g testcafe
+
+      - name: Update APT
+        run: apt-get update
+
+      - name: Install Chromium
+        run: apt-get install -y chromium
 
       - name: Run tests
         run: testcafe chromium:headless test/*.testcafe.ts
