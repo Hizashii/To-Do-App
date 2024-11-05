@@ -3,7 +3,7 @@ name: TeamWorkflow
 on:
   push:
     branches:
-      - main  
+      - main  # Ensure this matches the branch you want to push to
 
 jobs:
   integration-delivery:
@@ -23,11 +23,11 @@ jobs:
       - name: FTP delivery
         uses: SamKirkland/FTP-Deploy-Action@4.3.3
         with:
-          server: ${{ secrets.FTP_SERVER }}  # Use secrets for sensitive data
+          server: ${{ secrets.FTP_SERVER }}  # Ensure this is correctly set in your secrets
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: test/todo/ 
-          local-dir: dist/ 
+          server-dir: test/todo/  # Change as necessary
+          local-dir: dist/  # Make sure this matches your build output location
 
       - name: List files
         run: ls -R
@@ -70,8 +70,8 @@ jobs:
       - name: FTP deploy
         uses: SamKirkland/FTP-Deploy-Action@4.3.3
         with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: live/todo/ 
+          server: ${{ secrets.FTP_SERVER }}  # Ensure this is correct
+          username: ${{ secrets.FTP_USERNAME }}  # Ensure this is correct
+          password: ${{ secrets.FTP_PASSWORD }}  # Ensure this is correct
+          server-dir: live/todo/  # Change as necessary
           local-dir: dist/
