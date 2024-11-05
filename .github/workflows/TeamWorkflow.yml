@@ -12,9 +12,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: List repository structure
-        run: ls -R  # Check the repository structure
-      
+      - name: List full directory structure
+        run: |
+          echo "Current working directory:"
+          pwd
+          echo "Directory contents:"
+          ls -R  # Check the repository structure
+
       - name: Install Node.js
         uses: actions/setup-node@v3
         with:
@@ -25,7 +29,7 @@ jobs:
         run: npm install  # This installs dependencies from package.json in BDE
 
       - name: Build the application
-        working-directory: BDE  # Again, build from the BDE directory
+        working-directory: BDE  # Build from the BDE directory
         run: npm run build  # Ensure your build script is defined in BDE's package.json
 
       - name: Install TestCafe
@@ -38,8 +42,8 @@ jobs:
         run: sudo apt-get install -y chromium
 
       - name: Run tests
-        working-directory: BDE/src  # Pointing to where the test files are located
-        run: testcafe chromium:headless test/todo-app.js  # Adjust path to your test file
+        working-directory: BDE/src  # Adjust this path to where your tests are located
+        run: testcafe chromium:headless todo-app.testcafe.ts  # Adjust path to your test file
 
       - name: Store build artifacts
         uses: actions/upload-artifact@v4
