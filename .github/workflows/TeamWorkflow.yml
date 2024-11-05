@@ -48,20 +48,45 @@ jobs:
         run: testcafe chromium:headless test/todo-app.js
 
       - name: Store artifacts
+        run: |
+          echo "Checking if dist directory exists..."
+          if [ -d "dist" ]; then
+            echo "Uploading dist artifacts..."
+            tar -czf dist.tar.gz dist/  # Create a tarball of the dist directory
+            echo "Uploading artifacts..."
+            echo "Uploading dist artifacts..."
+            echo "dist.tar.gz" > dist-files.txt
+          else
+            echo "/dist directory not found!"
+            exit 1
+          fi
+
+      - name: Upload dist artifact
         uses: actions/upload-artifact@v4
         with:
           name: dist
-          path: dist/
+          path: dist.tar.gz
 
   deployment:
-    needs: integration-delivery
+    needs: run-tests
     runs-on: ubuntu-latest
     steps:
       - name: Load artifacts
         uses: actions/download-artifact@v4
         with:
           name: dist
-          path: dist/
+          path: ./  # Download to the current working directory
+
+      - name: Ensure dist.tar.gz exists
+        run: |
+          if [ ! -f "dist.tar.gz" ]; then
+            echo "dist.tar.gz not found!"
+            exit 1
+          fi
+
+      - name: Extract artifacts
+        run: |
+          tar -xzf dist.tar.gz  # Extract the downloaded tarball
 
       - name: Ensure /dist directory exists
         run: |
