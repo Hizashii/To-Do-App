@@ -7,7 +7,7 @@ on:
 
 jobs:
   integration-delivery:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest  # Change from using node container to ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -32,13 +32,13 @@ jobs:
         run: ls -R
 
   run-tests:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest  # Use the same environment
     needs: integration-delivery
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Install TestCafe
+      - name: Install TestCafe and Chromium
         run: |
           sudo apt-get update
           sudo apt-get install -y chromium
@@ -54,7 +54,6 @@ jobs:
             echo "Uploading dist artifacts..."
             tar -czf dist.tar.gz dist/  # Create a tarball of the dist directory
             echo "Uploading artifacts..."
-            echo "Uploading dist artifacts..."
             echo "dist.tar.gz" > dist-files.txt
           else
             echo "/dist directory not found!"
