@@ -22,11 +22,4 @@ job:
    - name: Build website
     run: npm run build
 
-   - name: FTP delivery
-    uses: SamKirkland/FTP-Deploy-Action@4.3.3
-    with:
-      server: ${{ vars.FTP_SERVER }}
-      username: ${{ secrets.FTP_USERNAME }}
-      password: ${{ secrets.FTP_PASSWORD }}
-      server-dir: test/todo/
-      local-dir: dist/
+ 
