@@ -34,13 +34,13 @@ jobs:
           local-dir: BDE/dist/ 
         
       - name: List files after build
-        run: ls -R BDE/dist/  # List contents of the build directory
+        run: ls -R BDE/dist/  
 
       - name: Install TestCafe
         run: npm install -g testcafe
 
       - name: Update APT
-        run: sudo apt-get update  # sudo might be needed for permissions
+        run: sudo apt-get update 
 
       - name: Install Chromium
         run: sudo apt-get install -y chromium
