@@ -1,87 +1,81 @@
-name: CI/CD Pipeline
-
 on:
-  push:
-    branches:
-      - main
+    push:
+        branches:
+            - main
 
 jobs:
-  integration-delivery:
-    runs-on: ubuntu-latest
-    environment: Test
-    container:
-      image: node
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+    integration-delivery:
+        runs-on: ubuntu-latest
+        environment: Test
+        container:
+            image: node
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v3
 
-      - name: Debug directory structure
-        run: |
-          pwd
-          ls -la
-          
-      - name: Install dependencies
-        run: npm install
-        
-      - name: Build website
-        run: npm run build
+            - name: Install dependencies
+              working-directory: BDE
+              run: npm install 
 
-      - name: Ensure BDE/dist exists
-        run: |
-          mkdir -p BDE/dist  # Create the directory if it doesn't exist
+            - name: Build website
+              working-directory: BDE
+              run: npm run build
+            
+            - name: FTP delivery
+              uses: SamKirkland/FTP-Deploy-Action@4.3.3
+              with:
+                  server: ${{ vars.FTP_SERVER }}
+                  username: ${{ secrets.FTP_USERNAME }}
+                  password: ${{ secrets.FTP_PASSWORD }}
+                  server-dir: test/todo/ 
+                  local-dir: BDE/dist/ 
+            
+            - name: List files
+              run: ls -R
 
-      - name: SFTP delivery
-        uses: appleboy/scp-action@master
-        with:
-          host: ssh.sunguard.dk  # Replace with your SFTP host
-          username: ${{ secrets.FTP_USERNAME }}  # Ensure this is set in secrets
-          password: ${{ secrets.FTP_PASSWORD }}  # Ensure this is set in secrets
-          port: 22  # Port for SFTP
-          source: "BDE/dist/*"  # Local files to upload
-          target: "/home/sunguard.dk/public_html/test/todo/"  # Target directory on the server
-          
-      - name: Install TestCafe
-        run: npm install -g testcafe
-        
-      - name: Update APT
-        run: |
-          apt-get update
-          apt-get install -y chromium
-          
-      - name: Run tests
-        run: testcafe chromium:headless test/todo-app.js
-        
-      - name: Store artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: dist
-          path: ./dist/
+            - name: Install TestCafe
+              run: npm install -g testcafe
 
-  deployment:
-    needs: integration-delivery
-    runs-on: ubuntu-latest
-    environment: Live
-    steps:
-      - name: Load artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: dist
-          path: ./dist/
-          
-      - name: Ensure /dist directory exists
-        run: |
-          ls -la
-          if [ ! -d "dist" ]; then
-            echo "/dist directory not found!"
-            exit 1
-          fi
-          
-      - name: SFTP delivery
-        uses: appleboy/scp-action@master
-        with:
-          host: ssh.sunguard.dk  # Replace with your SFTP host
-          username: ${{ secrets.FTP_USERNAME }}  # Ensure this is set in secrets
-          password: ${{ secrets.FTP_PASSWORD }}  # Ensure this is set in secrets
-          port: 22  # Port for SFTP
-          source: "BDE/dist/*"  # Local files to upload
-          target: "/home/sunguard.dk/public_html/test/todo/"  # Target directory on the server
+            - name: Update APT
+              run: apt-get update
+
+            - name: Install Chromium
+              run: apt-get install -y chromium
+            
+            - name: Run tests
+              working-directory: BDE
+              run: testcafe chromium:headless test/todo-app.js
+            
+            - name: Store artifacts
+              uses: actions/upload-artifact@v4  # Updated to v4
+              with:
+                  name: dist
+                  path: BDE/dist/
+    
+    deployment:
+        needs: integration-delivery
+        runs-on: ubuntu-latest
+        environment: Live
+        steps:
+            - name: Load artifacts
+              uses: actions/download-artifact@v4  # Updated to v4
+              with:
+                  name: dist
+                  path: BDE/dist/  # Adjusted path
+
+            - name: Ensure /dist directory exists
+              run: |
+                  if [ ! -d "BDE/dist" ]; then
+                    echo "/dist directory not found!"
+                    exit 1
+                  fi
+
+            - name: FTP deploy
+              uses: SamKirkland/FTP-Deploy-Action@4.3.3
+              with:
+                  server: ${{ vars.FTP_SERVER }}
+                  username: ${{ secrets.FTP_USERNAME }}
+                  password: ${{ secrets.FTP_PASSWORD }}
+                  server-dir: live/todo/ 
+                  local-dir: BDE/dist/ 
+            
