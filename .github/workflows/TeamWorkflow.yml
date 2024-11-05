@@ -55,7 +55,7 @@ jobs:
           path: 2024-todo-TS-app-bde-main/dist/
 
   deployment:
-    needs: integration-delivery
+    needs: integration-delivery  # This ensures deployment runs after integration-delivery
     runs-on: ubuntu-latest
     environment: Live
     steps:
