@@ -25,7 +25,11 @@ jobs:
         
       - name: Build website
         run: npm run build
-        
+
+      - name: Ensure BDE/dist exists
+        run: |
+          mkdir -p BDE/dist  # Create the directory if it doesn't exist
+
       - name: FTP delivery
         uses: SamKirkland/FTP-Deploy-Action@4.3.3
         with:
@@ -33,7 +37,7 @@ jobs:
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           server-dir: live/todo/
-          local-dir: BDE/dist/  # Ensure this ends with a slash if necessary
+          local-dir: BDE/dist/  # Ensure this ends with a slash
           
       - name: Install TestCafe
         run: npm install -g testcafe
@@ -78,4 +82,4 @@ jobs:
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           server-dir: live/todo/
-          local-dir: BDE/dist/  # Ensure this ends with a slash if necessary
+          local-dir: BDE/dist/  # Ensure this ends with a slash
