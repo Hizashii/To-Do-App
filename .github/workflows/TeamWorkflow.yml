@@ -14,10 +14,17 @@ jobs:
         uses: actions/checkout@v3
 
       - name: List files in the repository
-        run: ls -R  # This will help confirm the checkout structure
+        run: ls -R  # List files recursively to see the structure
+
+      - name: Verify BDE directory
+        run: |
+          if [ ! -d "BDE" ]; then
+            echo "BDE directory not found!"
+            exit 1
+          fi
 
       - name: Install dependencies
-        working-directory: BDE  # This assumes BDE is in the root of the repo
+        working-directory: BDE
         run: npm install 
 
       - name: Build website
@@ -33,14 +40,14 @@ jobs:
           server-dir: test/todo/
           local-dir: BDE/dist/ 
         
-      - name: List files after build
-        run: ls -R BDE/dist/  
+      - name: List files in build directory
+        run: ls -R BDE/dist/
 
       - name: Install TestCafe
         run: npm install -g testcafe
 
       - name: Update APT
-        run: sudo apt-get update 
+        run: sudo apt-get update
 
       - name: Install Chromium
         run: sudo apt-get install -y chromium
