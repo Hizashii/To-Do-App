@@ -1,81 +1,83 @@
 on:
-    push:
-        branches:
-            - main
+  push:
+    branches:
+      - main
 
 jobs:
-    integration-delivery:
-        runs-on: ubuntu-latest
-        environment: Test
-        container:
-            image: node
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v3
+  integration-delivery:
+    runs-on: ubuntu-latest
+    environment: Test
+    container:
+      image: node
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-            - name: Install dependencies
-              working-directory: BDE
-              run: npm install 
+      - name: List files in the repository
+        run: ls -R  # This will help confirm the checkout structure
 
-            - name: Build website
-              working-directory: BDE
-              run: npm run build
-            
-            - name: FTP delivery
-              uses: SamKirkland/FTP-Deploy-Action@4.3.3
-              with:
-                  server: ${{ vars.FTP_SERVER }}
-                  username: ${{ secrets.FTP_USERNAME }}
-                  password: ${{ secrets.FTP_PASSWORD }}
-                  server-dir: test/todo/ 
-                  local-dir: BDE/dist/ 
-            
-            - name: List files
-              run: ls -R
+      - name: Install dependencies
+        working-directory: BDE  # This assumes BDE is in the root of the repo
+        run: npm install 
 
-            - name: Install TestCafe
-              run: npm install -g testcafe
+      - name: Build website
+        working-directory: BDE
+        run: npm run build
+        
+      - name: FTP delivery
+        uses: SamKirkland/FTP-Deploy-Action@4.3.3
+        with:
+          server: ${{ vars.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: test/todo/
+          local-dir: BDE/dist/ 
+        
+      - name: List files after build
+        run: ls -R BDE/dist/  # List contents of the build directory
 
-            - name: Update APT
-              run: apt-get update
+      - name: Install TestCafe
+        run: npm install -g testcafe
 
-            - name: Install Chromium
-              run: apt-get install -y chromium
-            
-            - name: Run tests
-              working-directory: BDE
-              run: testcafe chromium:headless test/todo-app.js
-            
-            - name: Store artifacts
-              uses: actions/upload-artifact@v4  # Updated to v4
-              with:
-                  name: dist
-                  path: BDE/dist/
-    
-    deployment:
-        needs: integration-delivery
-        runs-on: ubuntu-latest
-        environment: Live
-        steps:
-            - name: Load artifacts
-              uses: actions/download-artifact@v4  # Updated to v4
-              with:
-                  name: dist
-                  path: BDE/dist/  # Adjusted path
+      - name: Update APT
+        run: sudo apt-get update  # sudo might be needed for permissions
 
-            - name: Ensure /dist directory exists
-              run: |
-                  if [ ! -d "BDE/dist" ]; then
-                    echo "/dist directory not found!"
-                    exit 1
-                  fi
+      - name: Install Chromium
+        run: sudo apt-get install -y chromium
+        
+      - name: Run tests
+        working-directory: BDE
+        run: testcafe chromium:headless test/todo-app.js
+        
+      - name: Store artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: BDE/dist/
 
-            - name: FTP deploy
-              uses: SamKirkland/FTP-Deploy-Action@4.3.3
-              with:
-                  server: ${{ vars.FTP_SERVER }}
-                  username: ${{ secrets.FTP_USERNAME }}
-                  password: ${{ secrets.FTP_PASSWORD }}
-                  server-dir: live/todo/ 
-                  local-dir: BDE/dist/ 
-            
+  deployment:
+    needs: integration-delivery
+    runs-on: ubuntu-latest
+    environment: Live
+    steps:
+      - name: Load artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: BDE/dist/
+
+      - name: Ensure /dist directory exists
+        run: |
+          if [ ! -d "BDE/dist" ]; then
+            echo "/dist directory not found!"
+            exit 1
+          fi
+
+      - name: FTP deploy
+        uses: SamKirkland/FTP-Deploy-Action@4.3.3
+        with:
+          server: ${{ vars.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: live/todo/
+          local-dir: BDE/dist/
