@@ -64,5 +64,26 @@ test('Mark a todo as completed', async t => {
     await t
         .click(completeCheckbox)  // Click the checkbox to mark as completed
         .wait(100);  // Optional wait to allow UI update
+});
 
+// Test for toggling dark mode
+test('Toggle dark mode', async t => {
+    // Selectors for the dark mode toggle button and the main container (or body) to check color change
+    const darkModeToggle = Selector('#darkModeToggle');
+    const mainContainer = Selector('body'); // Assuming body background color changes in dark mode
+
+    // Check that the toggle button is present
+    await t.expect(darkModeToggle.exists).ok('Dark mode toggle button not found.');
+
+    // Store the initial background color of the main container for comparison
+    const initialBackgroundColor = await mainContainer.getStyleProperty('background-color');
+
+    // Click the toggle button to enable dark mode
+    await t.click(darkModeToggle);
+
+    // Verify that the background color of the main container has changed
+    const darkModeBackgroundColor = await mainContainer.getStyleProperty('background-color');
+    await t
+        .expect(darkModeBackgroundColor)
+        .notEql(initialBackgroundColor, 'Background color did not change after toggling dark mode.');
 });
