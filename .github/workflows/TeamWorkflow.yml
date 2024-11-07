@@ -5,8 +5,8 @@ on:
     branches:
       - main
 
-jobs:  # Use 'jobs' instead of 'job'
-  integration-delivery:  # Job name
+jobs:  
+  integration-delivery:  
     runs-on: ubuntu-latest
     environment: Test  # Corrected spelling
     container:
@@ -15,17 +15,26 @@ jobs:  # Use 'jobs' instead of 'job'
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Install dependencies (root level)
-        working-directory: .
-        run: npm install  # Install dependencies in the root directory (or update to the right folder)
-
-      - name: Install dependencies (BDE folder)
-        working-directory: BDE  # Ensure we are inside the correct subdirectory
+      - name: Install dependencies
         run: npm install
 
       - name: Build website
-        working-directory: BDE
         run: npm run build
+
+      - name: Start development server
+        run: npm run dev &  # Start the server in the background
+        env:
+          HOST: localhost
+          PORT: 5174
+
+      - name: Wait for server to be ready
+        run: |
+          echo "Waiting for the development server to start..."
+          until curl -s http://localhost:5173; do
+            echo "Waiting for server to be ready..."
+            sleep 3
+          done
+          echo "Server is up and running!"
 
       - name: FTP delivery
         uses: SamKirkland/FTP-Deploy-Action@4.3.3
@@ -35,7 +44,7 @@ jobs:  # Use 'jobs' instead of 'job'
           password: ${{ secrets.FTP_PASSWORD }}
           server-dir: test/todo/
           local-dir: dist/  
-
+     
       - name: Install TestCafe
         run: npm install -g testcafe
 
@@ -53,6 +62,7 @@ jobs:  # Use 'jobs' instead of 'job'
         with:
           name: dist
           path: dist/
+
 
   deployment:
     needs: integration-delivery
@@ -72,3 +82,4 @@ jobs:  # Use 'jobs' instead of 'job'
           password: ${{ secrets.FTP_PASSWORD }}
           server-dir: live/todo/
           local-dir: dist/
+
