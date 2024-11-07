@@ -30,7 +30,7 @@ jobs:
       - name: Wait for server to be ready
         run: |
           echo "Waiting for the development server to start..."
-          until curl -s http://localhost:5173; do
+          until curl -s http://localhost:5174; do
             echo "Waiting for server to be ready..."
             sleep 3
           done

@@ -1,7 +1,7 @@
 import { Selector } from 'testcafe';
 
 fixture`Todo App Tests`
-    .page`https://live.sunguard.dk/todo/`
+    .page`http://localhost:5174`
     .beforeEach(async t => {
         // Clear local storage before each test for a clean state
         await t.eval(() => localStorage.clear());
@@ -12,7 +12,7 @@ test('Add two todos', async t => {
 
     await t
         .typeText(todoInput, 'Test Todo 1')
-        .pressKey('enter') 
+        .pressKey('enter') // Submit the form by pressing Enter
         .typeText(todoInput, 'Test Todo 2')
         .pressKey('enter');
 
@@ -27,7 +27,7 @@ test('Add two todos', async t => {
 test('Delete the first todo', async t => {
     const todoInput = Selector('#todo-input');
 
-    // Add two todos to delete one 2nd test
+    // Add two todos to delete one
     await t
         .typeText(todoInput, 'Test Todo 1')
         .pressKey('enter')
@@ -39,7 +39,7 @@ test('Delete the first todo', async t => {
 
     await t
         .expect(todoItem1.exists).ok('The first todo item to delete was not found.')
-        .click(deleteButton1) 
+        .click(deleteButton1) // Delete the first todo
         .expect(todoItem1.exists).notOk('The first todo item was not removed after deletion.');
 });
 
@@ -48,10 +48,10 @@ test('Mark a todo as completed', async t => {
     const todoInput = Selector('#todo-input');
     const todoText = 'Test Complete Todo';
 
-   
+    // Step 1: Add a todo item
     await t
         .typeText(todoInput, todoText)
-        .pressKey('enter'); 
+        .pressKey('enter'); // Submit the form by pressing Enter
 
     // Step 2: Locate the todo item and completion checkbox
     const todoItem = Selector('.todo-item').withText(todoText);
@@ -68,15 +68,20 @@ test('Mark a todo as completed', async t => {
 
 // Test for toggling dark mode
 test('Toggle dark mode', async t => {
+    // Selectors for the dark mode toggle button and the main container (or body) to check color change
     const darkModeToggle = Selector('#darkModeToggle');
-    const mainContainer = Selector('body'); 
+    const mainContainer = Selector('body'); // Assuming body background color changes in dark mode
 
+    // Check that the toggle button is present
     await t.expect(darkModeToggle.exists).ok('Dark mode toggle button not found.');
 
+    // Store the initial background color of the main container for comparison
     const initialBackgroundColor = await mainContainer.getStyleProperty('background-color');
 
+    // Click the toggle button to enable dark mode
     await t.click(darkModeToggle);
 
+    // Verify that the background color of the main container has changed
     const darkModeBackgroundColor = await mainContainer.getStyleProperty('background-color');
     await t
         .expect(darkModeBackgroundColor)
