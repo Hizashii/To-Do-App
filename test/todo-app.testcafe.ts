@@ -1,7 +1,7 @@
 import { Selector } from 'testcafe';
 
 fixture`Todo App Tests`
-    .page`http://localhost:5173`
+    .page`https://live.sunguard.dk/todo/`
     .beforeEach(async t => {
         // Clear local storage before each test for a clean state
         await t.eval(() => localStorage.clear());
