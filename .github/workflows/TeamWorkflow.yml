@@ -5,8 +5,8 @@ on:
     branches:
       - main
 
-jobs:  # Use 'jobs' instead of 'job'
-  integration-delivery:  # Job name
+jobs:  
+  integration-delivery:  
     runs-on: ubuntu-latest
     environment: Test  # Corrected spelling
     container:
@@ -43,7 +43,7 @@ jobs:  # Use 'jobs' instead of 'job'
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           server-dir: test/todo/
-          local-dir: dist/  # Ensure this points to the correct build output directory
+          local-dir: dist/  
      
       - name: Install TestCafe
         run: npm install -g testcafe

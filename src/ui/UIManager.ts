@@ -1,5 +1,7 @@
 import { Todo } from '../types/types';
 import { TodoService } from '../services/TodoService';
+import { ClockService } from '../services/ClockService';
+
 
 export class UIManager {
   private todoService: TodoService;
@@ -168,5 +170,19 @@ export class UIManager {
     }
 
     this.updateProgressBar();
+
+  }
+
+}
+const clockService = ClockService.getInstance();
+
+// Function to update the clock element in the DOM
+function updateClockDisplay() {
+  const clockElement = document.getElementById('clock');
+  if (clockElement) {
+    clockElement.textContent = clockService.getTime();
   }
 }
+
+// Start updating the clock every second
+setInterval(updateClockDisplay, 1000);
